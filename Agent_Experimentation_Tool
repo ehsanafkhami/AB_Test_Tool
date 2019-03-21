@@ -1,0 +1,91 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Nov 30 14:07:45 2018
+
+@author: eafkhami
+"""
+
+"""
+Created on Fri Nov 26 10:46:42 2018
+
+@author: eafkhami
+"""
+import tkinter as tk
+import hashlib
+import sys
+sys.setrecursionlimit(5000)
+
+root = tk.Tk()
+root.geometry("330x400")
+
+
+large_font = ('Verdana',40)
+xlarge_font = ('Verdana',20)
+small = ('Verdana',10)
+
+tt   = root.title("A/B Test")
+#BID length between 7 and 9
+#MID length between 2 and 9
+def limitSizeDay(*args):
+    value = dayValue.get()
+    if  len(value) >5: dayValue.set(value[:9])
+
+dayValue = tk.StringVar()
+dayValue.trace('w', limitSizeDay)
+
+ent1 = tk.Entry(root, font= xlarge_font, textvariable=dayValue)
+lbl0 = tk.Label(root, text="Please Enter Booking ID", font=xlarge_font)
+lbl00 = tk.Label(root, text="Group", font=xlarge_font)
+lbl1 = tk.Label(root, text="", font=large_font, fg="red")
+lbl2 = tk.Label(root, text="CEG Analytics", font=small)
+
+
+#Creat AB Split function
+def ab_split():
+        id = str(ent1.get())
+        salt = 'Test'
+        test_id = str(id) + ',' + str(salt)
+        test_id_digest = hashlib.md5(test_id.encode('ascii')).hexdigest()
+        test_id_first_digits = test_id_digest[:6]
+        test_id_first_int = int(test_id_first_digits, 16)
+        x = (test_id_first_int/0xFFFFFF)
+    
+        if x < 0.50:
+            lbl1["text"] = str('A')
+       #, "{:.1%}".format(x))
+        else:
+           lbl1["text"] = str('B')
+        #print('b', "{:.1%}".format(x))
+
+            
+def correct(inp):
+        if inp.isdigit():
+            return True
+        elif inp is "":
+            return True
+        else:
+            return False
+        
+def empty():
+        ent1.delete(0, 10)
+        lbl1["text"] = str('')
+
+button2 = tk.Button(root, text="Refresh", command=empty, font=('Verdana',15))
+
+ent1.bind(button2, empty())
+        
+reg=root.register(correct)
+ent1.config(validate="key", validatecommand=(reg, '%P'), width=12)
+ 
+button = tk.Button(root, text="Enter", command=ab_split, font=('Verdana',25))
+
+lbl0.grid(row=1, column=0, pady=5)
+ent1.grid(row=2, column=0, pady=5)
+lbl1.grid(row=3, column=0, pady=2)
+button.grid(row=4, column=0, pady=5)
+button2.grid(row=5, column=0, pady=10)
+lbl2.grid(row=6, column=0, pady=50)
+
+sys.setrecursionlimit(5000)
+
+root.mainloop()
